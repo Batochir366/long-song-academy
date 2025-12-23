@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu } from "lucide-react";
@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Calendar, School, CreditCard } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const navItems = [
@@ -18,6 +18,12 @@ const navItems = [
 export function AdminHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const handleLogout = () => {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminEmail");
+    router.push("/sign-in");
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
@@ -67,7 +73,12 @@ export function AdminHeader() {
               <p className="text-xs text-muted-foreground">admin@music.com</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" className="gap-2">
+          <Button
+            onClick={handleLogout}
+            variant="ghost"
+            size="sm"
+            className="gap-2"
+          >
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline">Logout</span>
           </Button>
