@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Folder, FolderPlus, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
+import apiClient from "@/lib/axios";
 
 interface Folder {
   id: string;
@@ -54,13 +55,12 @@ export function FolderDropdown({
   const loadFolders = async () => {
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8080/api/videos/folders");
-      const data = await response.json();
+      const response = await apiClient.get("/api/videos/folders");
 
-      if (response.ok) {
-        setFolders(data.folders);
+      if (response.status === 200) {
+        setFolders(response.data?.folders || []);
       } else {
-        toast.error(`Failed to load folders: ${data.error}`);
+        toast.error(`Failed to load folders: ${response.data?.error}`);
       }
     } catch (error) {
       console.error("Error loading folders:", error);
@@ -79,22 +79,20 @@ export function FolderDropdown({
 
     setCreating(true);
     try {
-      const response = await fetch("http://localhost:8080/api/videos/folders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newFolderName.trim() }),
+      const response = await apiClient.post("/api/videos/folders", {
+        name: newFolderName.trim(),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success(`Folder "${data.folder.name}" created successfully!`);
+      if (response.status === 200) {
+        toast.success(
+          `Folder "${response.data.folder.name}" created successfully!`
+        );
         setNewFolderName("");
         setOpen(false);
         loadFolders(); // Refresh list
-        onChange(data.folder.id); // Auto-select new folder
+        onChange(response.data?.folder?.id || ""); // Auto-select new folder
       } else {
-        toast.error(`Failed to create folder: ${data.error}`);
+        toast.error(`Failed to create folder: ${response.data?.error}`);
       }
     } catch (error) {
       console.error("Error creating folder:", error);
